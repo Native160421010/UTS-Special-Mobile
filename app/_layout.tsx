@@ -1,37 +1,83 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { Stack, useRouter } from "expo-router";
+import { AuthProvider, useAuth } from "./authContext";
+import React, { useEffect } from 'react';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+function RootLayout() {
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+  const router = useRouter();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  // GET LOG-IN STATUS
+  const { isLoggedIn } = useAuth();
 
+  // REDIRECT BASED ON LOGIN STATUS
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+    if (!isLoggedIn) {
+      // If not logged in => Login 1st
+      router.replace("./login");
+    } else {
+      // If logged in => Index
+      router.replace("/");
+    }
+  }, [isLoggedIn]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    // <View style={{ flex: 1 }}>
+    //   <Tabs>
+    //     <Tabs.Screen name="index" options={{
+    //       title: 'Home',
+    //       tabBarIcon: ({ focused }) => (
+    //         <TabBarIcon name='camera' color={focused ? 'blue' : 'grey'} />
+    //       ),
+    //     }} />
+    //     <Tabs.Screen name="quiz" options={{
+    //       title: 'Quiz',
+    //       tabBarIcon: ({ focused }) => (
+    //         <TabBarIcon name='list' color={focused ? 'blue' : 'grey'} />
+    //       ),
+    //     }} />
+    //     <Tabs.Screen name="highScore" options={{
+    //       title: 'High Score',
+    //       tabBarIcon: ({ focused }) => (
+    //         <TabBarIcon name='list' color={focused ? 'blue' : 'grey'} />
+    //       ),
+    //     }} />
+
+    //     {/* <Tabs.Screen name="login" options={{
+    //       title: 'Log Out',
+    //       tabBarIcon: ({ focused }) => (
+    //         <TabBarIcon name='book' color={focused ? 'blue' : 'grey'} />
+    //       ),
+    //     }} /> */}
+
+    //     <Button
+    //       title="Logout"
+    //       onPress={() => doLogout()}
+    //     />
+    //   </Tabs>
+
+    //   <View style={{ padding: 20 }}>
+    //     <Button
+    //       title="Logout"
+    //       onPress={() => doLogout()}
+    //     />
+    //   </View>
+
+    <Stack>
+      <Stack.Screen name="index" options={{ title: 'Home' }} />
+      <Stack.Screen name="login" options={{ title: 'Login' }} />
+      <Stack.Screen name="quiz" options={{ headerShown: false }} />
+      <Stack.Screen name="gameScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="animationW6" options={{ headerShown: false }} />
+    </Stack>
+    // </View>
+  );
+}
+
+export default function Layout() {
+  return (
+    <AuthProvider>
+      <RootLayout />
+    </AuthProvider>
   );
 }
