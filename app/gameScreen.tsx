@@ -1,20 +1,26 @@
 import React, { Component } from "react";
-import { View, Pressable } from "react-native";
-import { LinearProgress, Button, Text } from "@rneui/base";
-import { useNavigation } from "@react-navigation/native";
-import { ScrollView } from "react-native-gesture-handler";
+import { View, Pressable, ImageBackground } from "react-native";
+import { LinearProgress, Text, Card } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { styles } from "./styles";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import Icon from 'react-native-vector-icons/Ionicons';
+import * as Animatable from 'react-native-animatable';
+
 
 class GameScreen extends Component {
   // ======================== VARIABLES ========================
   // Timer game
   defaultTimer = 30;
-  setUpTimer = 3;
+  setUpTimer = 1;
 
   // Kolom per level
   defaultColumn = 3;
+
+  colorNeutral = ["#ff50a1", "#820086"];
+  colorRight = ["#25c7fd", "#1c6fff"];
+  colorWrong = ["#f7ab28", "#f02b2b"];
 
   // ======================== METHODS ========================
 
@@ -30,7 +36,7 @@ class GameScreen extends Component {
       const column = [];
       for (let j = 0; j < col; j++) {
         const randomBool = Math.random() >= 0.5;
-        
+
         if (randomBool) rightAnswer++;
 
         const key = `button-${i}-${j}`;
@@ -42,13 +48,19 @@ class GameScreen extends Component {
             key={key}
             disabled={true}
             style={[
-              styles.Pressable,
-              randomBool ? styles.buttRight : styles.buttWrong,
+              styles.Pressable
             ]}
             onPress={() => this.checkButton(randomBool, key)}
-          ></Pressable>
+          >
+            <LinearGradient
+              colors={randomBool ? this.colorRight : this.colorWrong}
+              start={[0.125, 0.5]}
+              style={styles.linearGradGame}
+            ></LinearGradient>
+            {/* <Image source={require('../assets/images/diamond_block.png')} style={{ resizeMode: "cover", width: 50, height: 50, borderRadius: 5}} /> */}
+          </Pressable>
         );
-        
+
       }
 
       buttons.push(
@@ -88,9 +100,11 @@ class GameScreen extends Component {
       if (rightAnswer === 1) {
         if (curLvl >= this.state.levelMax - 1) {
           finishState = true;
+
           this.setState({
             score: curScore,
             isFinished: finishState,
+            gameOverText: 'CONGRATS!'
           });
         } else {
           curLvl += 1;
@@ -144,16 +158,17 @@ class GameScreen extends Component {
             disabled={this.state.setUp ? true : disabled[key]}
             style={[
               styles.Pressable,
-              disabled[key]
-                ? correctAnswers[key]
-                  ? styles.buttRight
-                  : styles.buttWrong
-                : styles.buttNeutral,
             ]}
             onPress={() => {
               this.checkButton(correctAnswers[key], key);
             }}
-          ></Pressable>
+          >
+            <LinearGradient
+              colors={disabled[key] ? correctAnswers[key] ? this.colorRight : this.colorRight : this.colorNeutral}
+              start={[0.125, 0.5]}
+              style={styles.linearGradGame}
+            ></LinearGradient>
+          </Pressable>
         );
       }
 
@@ -179,7 +194,7 @@ class GameScreen extends Component {
     if (hours < 10) hours_str = "0" + hours_str;
     if (minutes < 10) minutes_str = "0" + minutes_str;
     if (seconds < 10) seconds_str = "0" + seconds_str;
-    return hours_str + ":" + minutes_str + ":" + seconds_str;
+    return hours_str + " : " + minutes_str + " : " + seconds_str;
   }
 
   restart() {
@@ -192,6 +207,7 @@ class GameScreen extends Component {
         score: 0,
         rightAnswer: 0,
         buttons: [],
+        gameOverText: 'GAME OVER.'
       },
       () => {
         this.generateGame(this.state.level);
@@ -257,7 +273,7 @@ class GameScreen extends Component {
     }
   }
 
-  
+
 
   // Check when Page turns on
   componentDidMount() {
@@ -296,7 +312,7 @@ class GameScreen extends Component {
     clearInterval(this.state.oneSecInterval);
   }
 
-  
+
 
   // ======================== STATE ========================
   state = {
@@ -305,6 +321,7 @@ class GameScreen extends Component {
     level: 0,
     score: 0,
     isFinished: false,
+    gameOverText: 'GAME OVER.',
     username: "",
     topScores: [],
     buttons: [],
@@ -337,57 +354,116 @@ class GameScreen extends Component {
   // ======================== MAIN UI ========================
   render() {
     if (this.state.isFinished) {
-      const { topScores } = this.state;
       return (
-        <View style={styles.vparent}>
-          <Text style={styles.txtTitle}>{this.state.username}</Text>
-          <Text style={styles.txtTitle}>Your Score:</Text>
-          <Text>{this.state.score.toString()}</Text>
-          <Button
-            color={"secondary"}
-            style={styles.buttAnswer}
-            onPress={() => this.restart()}
-          >
-            Play Again
-          </Button>
+        <ImageBackground source={require('../assets/images/Background.png')} style={styles.centre}>
+          <View style={styles.vparent}>
+            <Animatable.View
+              style={styles.viewMMTitle}
+              animation="swing"
+              iterationCount={1}
+            >
+              <Text style={styles.textMMUsername}>Username: {this.state.username}</Text>
+            </Animatable.View>
 
-          <Button
-            color={"secondary"}
-            style={styles.buttAnswer}
-            onPress={() => router.push("/highScore")}
-          >
-            Cek Highscores
-          </Button>
-        </View>
+            <Animatable.View
+              style={styles.viewMMTitle}
+              animation="swing"
+              iterationCount={1}
+            >
+              <Text style={[styles.textTitle, styles.textTitleLeft]}>{this.state.gameOverText}</Text>
+            </Animatable.View>
+
+            <Animatable.View
+              style={styles.viewMMTitle}
+              animation="swing"
+              iterationCount={1}
+            >
+              <Text style={[styles.textTitle, styles.textTitleLeft]}>Your Score: </Text>
+              <Text style={[styles.textTitle, styles.textTitleRight]}>{this.state.score.toString()}</Text>
+            </Animatable.View>
+
+            <Animatable.View
+              animation="fadeInUpBig"
+              iterationCount={1}
+            >
+              <Pressable onPress={() => this.restart()} style={styles.buttonGSMenu}>
+                <Text style={styles.textMMButton}>Play Again</Text>
+                <Icon
+                  name="game-controller-outline"
+                  size={25}
+                  color="white"
+                  style={styles.icon}
+                />
+              </Pressable>
+
+              <Pressable onPress={() => router.push("/highScore")} style={styles.buttonGSMenu}>
+                <Text style={styles.textMMButton}>Check High Scores</Text>
+                <Icon
+                  name="trophy-outline"
+                  size={25}
+                  color="white"
+                  style={styles.icon}
+                />
+              </Pressable>
+
+              <Pressable onPress={() => router.replace("/")} style={styles.buttonGSMenu}>
+                <Text style={styles.textMMButton}>Main Menu</Text>
+                <Icon
+                  name="game-controller-outline"
+                  size={25}
+                  color="white"
+                  style={styles.icon}
+                />
+              </Pressable>
+            </Animatable.View>
+          </View>
+        </ImageBackground>
       );
     } else {
       return (
-        <ScrollView>
-          <View style={styles.vparent}>
+
+        <ImageBackground source={require('../assets/images/Background.png')} style={styles.centre}>
+          <Animatable.View style={styles.vparent} animation="bounceIn" iterationCount={1}>
             <LinearProgress
               animation={false}
-              value={1 - this.state.timer / this.defaultTimer}
-              style={{ margin: 30 }}
-              color="green"
+              value={this.state.timer / (this.state.setUp ? this.setUpTimer : this.defaultTimer)}
+              color="#f2422b"
+              style={styles.clock}
             />
 
-            <Text style={styles.txtDesc}>
-              Count: {this.toHHMMSS(this.state.timer)}
+            <Text style={styles.textHaha}>
+              {this.toHHMMSS(this.state.timer)}
             </Text>
-            <Text style={styles.txtTitle}>Level {this.state.level + 1}</Text>
-            <Text style={styles.txtDesc}>Score: {this.state.score}</Text>
+
+            <Card containerStyle={styles.cardGame}>
+              <View style={styles.viewGSTitle}>
+                <Text style={[styles.textTitle, styles.textTitleLeft2]}>LEVEL</Text>
+                <Text style={[styles.textTitle, styles.textTitleRight2]}>{this.state.level + 1}</Text>
+              </View>
+
+              <View style={styles.viewGSTitle}>
+                <Text style={styles.textHaha}>Score: </Text>
+                <Text style={styles.textHehe}>{this.state.score}</Text>
+              </View>
+            </Card>
+
             {this.state.setUp ? (
-              <Text style={styles.txtDesc}>SET UP TIME</Text>
+              <Animatable.Text style={styles.textHaha} animation="swing" iterationCount={1}>
+                PAY ATTENTION!
+              </Animatable.Text>
             ) : (
-              <Text style={styles.txtDesc}>
-                Boxes Remaining: {this.state.rightAnswer}
-              </Text>
+              <Animatable.View animation="swing" iterationCount={1} style={styles.viewMMTitle}>
+                <Text style={styles.textHaha}>Boxes Remaining: </Text>
+                <Text style={styles.textHehe}>{this.state.rightAnswer}</Text>
+              </Animatable.View>
             )}
 
             {/* {this.generateGame(this.defaultRow, this.state.level)} */}
-            {this.state.buttons}
-          </View>
-        </ScrollView>
+            <Animatable.View style={styles.vparent} animation="swing" iterationCount={1}>
+              {this.state.buttons}
+            </Animatable.View>
+          </Animatable.View>
+        </ImageBackground>
       );
     }
   }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Card, Button } from "@rneui/base";
-import { Text, TextInput, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { ImageBackground, Pressable, Text, TextInput, View } from 'react-native';
 import { useAuth } from './authContext';
 import { useState } from 'react';
 import { styles } from './styles';
@@ -26,26 +27,34 @@ function Login() {
 
     // ======================== MAIN UI ========================
     return (
-        <Card>
-            <Card.Title>Silakan Login</Card.Title>
-            <Card.Divider />
+        <ImageBackground source={require('../assets/images/Background.png')} style={styles.centre}>
+            <View style={styles.viewMMTitle}>
+                <Text style={[styles.textTitle, styles.textTitleLeft]}>MEMO</Text>
+                <Text style={[styles.textTitle, styles.textTitleRight]}>PATTERN</Text>
+            </View>
+            <Card containerStyle={styles.cardLogin}>
+                <Card.Title style={styles.textMMButton}>Sign In to Play!</Card.Title>
+                <Card.Divider />
 
-            <View style={styles.viewRow}>
-                <Text>Username </Text>
+                <Text style={styles.textMMButton}>Username </Text>
                 <TextInput style={styles.input}
                     onChangeText={(text) => setUsername(text)} value={username} />
-            </View>
-            <View style={styles.viewRow}>
-                <Text>Password </Text>
+
+                <Text style={styles.textMMButton}>Password </Text>
                 <TextInput secureTextEntry={true} style={styles.input}
                     onChangeText={(text) => setPassword(text)} value={password} />
-            </View>
-            <View style={styles.viewRow}>
-                <Button style={styles.button} title="Submit"
-                    onPress={() => { doLogin() }} />
-            </View>
 
-        </Card>
+                <Pressable style={styles.buttonLogin} onPress={() => { doLogin() }} >
+                    <Text style={styles.textMMButton}>Login</Text>
+                    <Icon
+                        name="log-in-outline"
+                        size={25}
+                        color="white"
+                        style={styles.icon}
+                    />
+                </Pressable>
+            </Card>
+        </ImageBackground>
     );
 }
 export default Login;

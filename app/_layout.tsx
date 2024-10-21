@@ -65,11 +65,10 @@ function RootLayout() {
 
     <Stack>
       <Stack.Screen name="index" options={{ title: 'Home' }} />
-      <Stack.Screen name="login" options={{ title: 'Login' }} />
-      <Stack.Screen name="quiz" options={{ headerShown: false }} />
       <Stack.Screen name="gameScreen" options={{ title: "Game" }} />
+      <Stack.Screen name="howToPlay" options={{ title: "How to Play" }} />
       <Stack.Screen name="highScore" options={{ title: "All Time High Scores" }} />
-      <Stack.Screen name="animationW6" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ title: 'Login' }} />
     </Stack>
     // </View>
   );
